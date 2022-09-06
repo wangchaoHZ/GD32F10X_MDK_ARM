@@ -1,7 +1,7 @@
 /*!
     \file    main.c
     \brief   ...
-    
+
     \version 2022-09-07, V1.0.0, Demo Project for GD32F10x
 */
 
@@ -20,6 +20,6 @@
 int main(void)
 {
     systick_config();
-		ulog_init();
+    ulog_init();
     ulog_info("this is a demo project.");
 }
