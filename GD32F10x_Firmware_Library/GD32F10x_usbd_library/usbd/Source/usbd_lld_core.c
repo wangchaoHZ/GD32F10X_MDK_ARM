@@ -11,90 +11,88 @@
 /*
     Copyright (c) 2022, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
 
 #include "usbd_lld_core.h"
 #include "usbd_enum.h"
 
-#define USB_EPTYPE_MASK           0x03U
+#define USB_EPTYPE_MASK 0x03U
 
-#if defined (__CC_ARM)         /* ARM Compiler */
-static usbd_ep_ram btable_ep[EP_COUNT]__attribute__((at(USBD_RAM + 2 * (BTABLE_OFFSET & 0xFFF8))));
-#elif defined (__ICCARM__)     /* IAR Compiler */
-    __no_init usbd_ep_ram btable_ep[EP_COUNT] @(USBD_RAM + 2 * (BTABLE_OFFSET & 0xFFF8));
-#elif defined (__GNUC__)       /* GNU GCC Compiler  */
-    usbd_ep_ram *btable_ep = (usbd_ep_ram *)(USBD_RAM + 2 * (BTABLE_OFFSET & 0xFFF8));
+#if defined(__CC_ARM) /* ARM Compiler */
+static usbd_ep_ram btable_ep[EP_COUNT] __attribute__((at(USBD_RAM + 2 * (BTABLE_OFFSET & 0xFFF8))));
+#elif defined(__ICCARM__) /* IAR Compiler */
+__no_init usbd_ep_ram btable_ep[EP_COUNT] @(USBD_RAM + 2 * (BTABLE_OFFSET & 0xFFF8));
+#elif defined(__GNUC__)   /* GNU GCC Compiler  */
+usbd_ep_ram *btable_ep = (usbd_ep_ram *)(USBD_RAM + 2 * (BTABLE_OFFSET & 0xFFF8));
 #endif
 
 usb_core_drv usbd_core;
 
 static const uint32_t ep_type[] =
-{
-    [USB_EP_ATTR_CTL]  = EP_CONTROL,
-    [USB_EP_ATTR_BULK] = EP_BULK,
-    [USB_EP_ATTR_INT]  = EP_INTERRUPT,
-    [USB_EP_ATTR_ISO]  = EP_ISO
-};
+    {
+        [USB_EP_ATTR_CTL] = EP_CONTROL,
+        [USB_EP_ATTR_BULK] = EP_BULK,
+        [USB_EP_ATTR_INT] = EP_INTERRUPT,
+        [USB_EP_ATTR_ISO] = EP_ISO};
 
 /* local function prototypes ('static') */
-static void usbd_dp_pullup (FlagStatus status);
-static void usbd_core_reset (void);
-static void usbd_core_stop (void);
-static void usbd_address_set (usb_dev *udev);
-static void usbd_ep_reset (usb_dev *udev);
-static void usbd_ep_setup (usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, const usb_desc_ep *ep_desc);
-static void usbd_ep_rx_enable (usb_dev *udev, uint8_t ep_addr);
-static void usbd_ep_disable (usb_dev *udev, uint8_t ep_addr);
-static void usbd_ep_stall_set (usb_dev *udev, uint8_t ep_addr);
-static void usbd_ep_stall_clear (usb_dev *udev, uint8_t ep_addr);
-static void usbd_ep_data_write (uint8_t *user_fifo, uint8_t ep_num, uint16_t bytes);
-static uint16_t usbd_ep_data_read (uint8_t *user_fifo, uint8_t ep_num, uint8_t buf_kind);
-static void usbd_resume (usb_dev *udev);
-static void usbd_suspend (void);
-static void usbd_leave_suspend (void);
-static uint16_t usbd_ep_status (usb_dev *udev, uint8_t ep_addr);
+static void usbd_dp_pullup(FlagStatus status);
+static void usbd_core_reset(void);
+static void usbd_core_stop(void);
+static void usbd_address_set(usb_dev *udev);
+static void usbd_ep_reset(usb_dev *udev);
+static void usbd_ep_setup(usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, const usb_desc_ep *ep_desc);
+static void usbd_ep_rx_enable(usb_dev *udev, uint8_t ep_addr);
+static void usbd_ep_disable(usb_dev *udev, uint8_t ep_addr);
+static void usbd_ep_stall_set(usb_dev *udev, uint8_t ep_addr);
+static void usbd_ep_stall_clear(usb_dev *udev, uint8_t ep_addr);
+static void usbd_ep_data_write(uint8_t *user_fifo, uint8_t ep_num, uint16_t bytes);
+static uint16_t usbd_ep_data_read(uint8_t *user_fifo, uint8_t ep_num, uint8_t buf_kind);
+static void usbd_resume(usb_dev *udev);
+static void usbd_suspend(void);
+static void usbd_leave_suspend(void);
+static uint16_t usbd_ep_status(usb_dev *udev, uint8_t ep_addr);
 
 struct _usb_handler usbd_drv_handler =
-{
-    .dp_pullup      = usbd_dp_pullup,
-    .init           = usbd_core_reset,
-    .deinit         = usbd_core_stop,
-    .suspend        = usbd_suspend,
-    .suspend_leave  = usbd_leave_suspend,
-    .resume         = usbd_resume,
-    .set_addr       = usbd_address_set,
-    .ep_reset       = usbd_ep_reset,
-    .ep_disable     = usbd_ep_disable,
-    .ep_setup       = usbd_ep_setup,
-    .ep_rx_enable   = usbd_ep_rx_enable,
-    .ep_write       = usbd_ep_data_write,
-    .ep_read        = usbd_ep_data_read,
-    .ep_stall_set   = usbd_ep_stall_set,
-    .ep_stall_clear = usbd_ep_stall_clear,
-    .ep_status_get  = usbd_ep_status
-};
+    {
+        .dp_pullup = usbd_dp_pullup,
+        .init = usbd_core_reset,
+        .deinit = usbd_core_stop,
+        .suspend = usbd_suspend,
+        .suspend_leave = usbd_leave_suspend,
+        .resume = usbd_resume,
+        .set_addr = usbd_address_set,
+        .ep_reset = usbd_ep_reset,
+        .ep_disable = usbd_ep_disable,
+        .ep_setup = usbd_ep_setup,
+        .ep_rx_enable = usbd_ep_rx_enable,
+        .ep_write = usbd_ep_data_write,
+        .ep_read = usbd_ep_data_read,
+        .ep_stall_set = usbd_ep_stall_set,
+        .ep_stall_clear = usbd_ep_stall_clear,
+        .ep_status_get = usbd_ep_status};
 
 /*!
     \brief      free buffer used from application by toggling the SW_BUF byte
@@ -103,13 +101,18 @@ struct _usb_handler usbd_drv_handler =
     \param[out] none
     \retval     None
 */
-void user_buffer_free (uint8_t ep_num, uint8_t dir)
+void user_buffer_free(uint8_t ep_num, uint8_t dir)
 {
-    if ((uint8_t)DBUF_EP_OUT == dir) {
+    if ((uint8_t)DBUF_EP_OUT == dir)
+    {
         USBD_TX_DTG_TOGGLE(ep_num);
-    } else if ((uint8_t)DBUF_EP_IN == dir) {
+    }
+    else if ((uint8_t)DBUF_EP_IN == dir)
+    {
         USBD_RX_DTG_TOGGLE(ep_num);
-    } else {
+    }
+    else
+    {
         /* no operation */
     }
 }
@@ -120,11 +123,14 @@ void user_buffer_free (uint8_t ep_num, uint8_t dir)
     \param[out] none
     \retval     none
 */
-static void usbd_dp_pullup (FlagStatus status)
+static void usbd_dp_pullup(FlagStatus status)
 {
-    if (SET == status) {
+    if (SET == status)
+    {
         gpio_bit_set(USB_PULLUP, USB_PULLUP_PIN);
-    } else {
+    }
+    else
+    {
         gpio_bit_reset(USB_PULLUP, USB_PULLUP_PIN);
     }
 }
@@ -135,7 +141,7 @@ static void usbd_dp_pullup (FlagStatus status)
     \param[out] none
     \retval     none
 */
-static void usbd_core_reset (void)
+static void usbd_core_reset(void)
 {
     /* reset the CLOSE bit */
     USBD_CTL = CTL_SETRST;
@@ -168,7 +174,7 @@ static void usbd_core_reset (void)
     \param[out] none
     \retval     none
 */
-static void usbd_core_stop (void)
+static void usbd_core_stop(void)
 {
     /* disable all interrupts and set USB reset */
     USBD_CTL = CTL_SETRST;
@@ -186,7 +192,7 @@ static void usbd_core_stop (void)
     \param[out] none
     \retval     none
 */
-static void usbd_address_set (usb_dev *udev)
+static void usbd_address_set(usb_dev *udev)
 {
     USBD_DADDR = DADDR_USBEN | udev->dev_addr;
 }
@@ -197,7 +203,7 @@ static void usbd_address_set (usb_dev *udev)
     \param[out] none
     \retval     none
 */
-static void usbd_ep_reset (usb_dev *udev)
+static void usbd_ep_reset(usb_dev *udev)
 {
     uint8_t i = 0U;
 
@@ -214,19 +220,23 @@ static void usbd_ep_reset (usb_dev *udev)
 
     transc->max_len = USBD_EP0_MAX_SIZE;
 
-    if (transc->max_len > 62U) {
+    if (transc->max_len > 62U)
+    {
         btable_ep[0].rx_count = ((uint16_t)((uint16_t)transc->max_len << 5) - 1U) | 0x8000U;
-    } else {
+    }
+    else
+    {
         btable_ep[0].rx_count = ((transc->max_len + 1U) & ~1U) << 9U;
     }
 
     /* reset non-control endpoints */
-    for (i = 1U; i < EP_COUNT; i++) {
+    for (i = 1U; i < EP_COUNT; i++)
+    {
         USBD_EPxCS(i) = (USBD_EPxCS(i) & (~EPCS_MASK)) | i;
     }
 
     /* clear endpoint 0 register */
-    USBD_EPxCS(0U)= (uint16_t)(USBD_EPxCS(0U));
+    USBD_EPxCS(0U) = (uint16_t)(USBD_EPxCS(0U));
 
     USBD_EPxCS(0U) = EP_CONTROL | EPRX_VALID | EPTX_NAK;
 
@@ -245,7 +255,7 @@ static void usbd_ep_reset (usb_dev *udev)
     \param[out] none
     \retval     none
 */
-static void usbd_ep_setup (usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, const usb_desc_ep *ep_desc)
+static void usbd_ep_setup(usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, const usb_desc_ep *ep_desc)
 {
     uint8_t ep_addr = ep_desc->bEndpointAddress;
     uint8_t ep_num = EP_ID(ep_addr);
@@ -256,17 +266,21 @@ static void usbd_ep_setup (usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, c
     /* set the endpoint type */
     USBD_EPxCS(ep_num) = ep_type[ep_desc->bmAttributes & USB_EPTYPE_MASK] | ep_num;
 
-    if (EP_DIR(ep_addr)) {
+    if (EP_DIR(ep_addr))
+    {
         transc = &udev->transc_in[ep_num];
 
         transc->max_len = max_len;
 
-        if ((uint8_t)EP_BUF_SNG == buf_kind) {
+        if ((uint8_t)EP_BUF_SNG == buf_kind)
+        {
             btable_ep[ep_num].tx_addr = buf_addr;
 
             /* configure the endpoint status as NAK status */
             USBD_EP_TX_STAT_SET(ep_num, EPTX_NAK);
-        } else if ((uint8_t)EP_BUF_DBL == buf_kind) {
+        }
+        else if ((uint8_t)EP_BUF_DBL == buf_kind)
+        {
             USBD_EP_DBL_BUF_SET(ep_num);
 
             btable_ep[ep_num].tx_addr = buf_addr & 0xFFFFU;
@@ -274,17 +288,24 @@ static void usbd_ep_setup (usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, c
 
             USBD_EP_TX_STAT_SET(ep_num, EPTX_VALID);
             USBD_EP_RX_STAT_SET(ep_num, EPRX_DISABLED);
-        } else {
+        }
+        else
+        {
             /* error operation */
         }
-    } else {
+    }
+    else
+    {
         transc = &udev->transc_out[ep_num];
 
         transc->max_len = max_len;
 
-        if ((uint8_t)EP_BUF_SNG == buf_kind) {
+        if ((uint8_t)EP_BUF_SNG == buf_kind)
+        {
             btable_ep[ep_num].rx_addr = buf_addr;
-        } else if ((uint8_t)EP_BUF_DBL == buf_kind) {
+        }
+        else if ((uint8_t)EP_BUF_DBL == buf_kind)
+        {
             USBD_EP_DBL_BUF_SET(ep_num);
 
             USBD_TX_DTG_TOGGLE(ep_num);
@@ -292,28 +313,41 @@ static void usbd_ep_setup (usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, c
             btable_ep[ep_num].tx_addr = buf_addr & 0xFFFFU;
             btable_ep[ep_num].rx_addr = (buf_addr & 0xFFFF0000U) >> 16U;
 
-            if (max_len > 62U) {
+            if (max_len > 62U)
+            {
                 btable_ep[ep_num].tx_count = (((uint32_t)max_len << 5) - 1U) | 0x8000U;
-            } else {
+            }
+            else
+            {
                 btable_ep[ep_num].tx_count = ((max_len + 1U) & ~1U) << 9U;
             }
-        } else {
+        }
+        else
+        {
             /* error operation */
         }
 
-        if (max_len > 62U) {
+        if (max_len > 62U)
+        {
             btable_ep[ep_num].rx_count = (((uint32_t)max_len << 5U) - 1U) | 0x8000U;
-        } else {
+        }
+        else
+        {
             btable_ep[ep_num].rx_count = ((max_len + 1U) & ~1U) << 9U;
         }
 
-        if ((uint8_t)EP_BUF_SNG == buf_kind) {
+        if ((uint8_t)EP_BUF_SNG == buf_kind)
+        {
             /* configure the endpoint status as NAK status */
             USBD_EP_RX_STAT_SET(ep_num, EPRX_NAK);
-        } else if ((uint8_t)EP_BUF_DBL == buf_kind) {
+        }
+        else if ((uint8_t)EP_BUF_DBL == buf_kind)
+        {
             USBD_EP_RX_STAT_SET(ep_num, EPRX_DISABLED);
             USBD_EP_TX_STAT_SET(ep_num, EPTX_NAK);
-        } else {
+        }
+        else
+        {
             /* error operation */
         }
     }
@@ -329,20 +363,23 @@ static void usbd_ep_setup (usb_dev *udev, uint8_t buf_kind, uint32_t buf_addr, c
     \param[out] none
     \retval     none
 */
-static void usbd_ep_disable (usb_dev *udev, uint8_t ep_addr)
+static void usbd_ep_disable(usb_dev *udev, uint8_t ep_addr)
 {
     (void)udev;
 
     uint8_t ep_num = EP_ID(ep_addr);
 
-    if (EP_DIR(ep_addr)) {
+    if (EP_DIR(ep_addr))
+    {
         USBD_TX_DTG_CLEAR(ep_num);
 
         /* configure the endpoint status as DISABLED */
         USBD_EP_TX_STAT_SET(ep_num, EPTX_DISABLED);
-    } else {
+    }
+    else
+    {
         USBD_RX_DTG_CLEAR(ep_num);
-      
+
         /* configure the endpoint status as DISABLED */
         USBD_EP_RX_STAT_SET(ep_num, EPRX_DISABLED);
     }
@@ -358,7 +395,7 @@ static void usbd_ep_disable (usb_dev *udev, uint8_t ep_addr)
     \param[out] none
     \retval     none
 */
-static void usbd_ep_rx_enable (usb_dev *udev, uint8_t ep_addr)
+static void usbd_ep_rx_enable(usb_dev *udev, uint8_t ep_addr)
 {
     (void)udev;
 
@@ -376,19 +413,25 @@ static void usbd_ep_rx_enable (usb_dev *udev, uint8_t ep_addr)
     \param[out] none
     \retval     none
 */
-static void usbd_ep_stall_set (usb_dev *udev, uint8_t ep_addr)
+static void usbd_ep_stall_set(usb_dev *udev, uint8_t ep_addr)
 {
     uint8_t ep_num = EP_ID(ep_addr);
 
-    if (0U == ep_num) {
+    if (0U == ep_num)
+    {
         USBD_EP_TX_STAT_SET(0U, EPTX_STALL);
         USBD_EP_RX_STAT_SET(0U, EPRX_STALL);
-    } else {
-        if (EP_DIR(ep_addr)) {
+    }
+    else
+    {
+        if (EP_DIR(ep_addr))
+        {
             udev->transc_in[ep_num].ep_stall = 1U;
 
             USBD_EP_TX_STAT_SET(ep_num, EPTX_STALL);
-        } else {
+        }
+        else
+        {
             udev->transc_out[ep_num].ep_stall = 1U;
 
             USBD_EP_RX_STAT_SET(ep_num, EPRX_STALL);
@@ -406,12 +449,14 @@ static void usbd_ep_stall_set (usb_dev *udev, uint8_t ep_addr)
     \param[out] none
     \retval     none
 */
-static void usbd_ep_stall_clear (usb_dev *udev, uint8_t ep_addr)
+static void usbd_ep_stall_clear(usb_dev *udev, uint8_t ep_addr)
 {
     uint8_t ep_num = EP_ID(ep_addr);
 
-    if (EP_DIR(ep_addr)) {
-        if(EPTX_STALL == usbd_ep_status_get(udev, ep_addr)){
+    if (EP_DIR(ep_addr))
+    {
+        if (EPTX_STALL == usbd_ep_status_get(udev, ep_addr))
+        {
             /* clear endpoint data toggle bit */
             USBD_TX_DTG_CLEAR(ep_num);
 
@@ -420,8 +465,11 @@ static void usbd_ep_stall_clear (usb_dev *udev, uint8_t ep_addr)
             /* clear endpoint stall status */
             USBD_EP_TX_STAT_SET(ep_num, EPTX_VALID);
         }
-    } else {
-        if(EPRX_STALL == usbd_ep_status_get(udev, ep_addr)){
+    }
+    else
+    {
+        if (EPRX_STALL == usbd_ep_status_get(udev, ep_addr))
+        {
             /* clear endpoint data toggle bit */
             USBD_RX_DTG_CLEAR(ep_num);
 
@@ -431,7 +479,6 @@ static void usbd_ep_stall_clear (usb_dev *udev, uint8_t ep_addr)
             USBD_EP_RX_STAT_SET(ep_num, EPRX_VALID);
         }
     }
-
 }
 
 /*!
@@ -444,15 +491,18 @@ static void usbd_ep_stall_clear (usb_dev *udev, uint8_t ep_addr)
     \param[out] none
     \retval     endpoint status
 */
-static uint16_t usbd_ep_status (usb_dev *udev, uint8_t ep_addr)
+static uint16_t usbd_ep_status(usb_dev *udev, uint8_t ep_addr)
 {
     (void)udev;
 
     uint32_t epcs = USBD_EPxCS(EP_ID(ep_addr));
 
-    if (EP_DIR(ep_addr)) {
+    if (EP_DIR(ep_addr))
+    {
         return (uint16_t)(epcs & EPxCS_TX_STA);
-    } else {
+    }
+    else
+    {
         return (uint16_t)(epcs & EPxCS_RX_STA);
     }
 }
@@ -465,14 +515,16 @@ static uint16_t usbd_ep_status (usb_dev *udev, uint8_t ep_addr)
     \param[out] none
     \retval     none
 */
-static void usbd_ep_data_write (uint8_t *user_fifo, uint8_t ep_num, uint16_t bytes)
+static void usbd_ep_data_write(uint8_t *user_fifo, uint8_t ep_num, uint16_t bytes)
 {
-    if (0U != bytes) {
+    if (0U != bytes)
+    {
         uint32_t n;
         uint32_t *write_addr = (uint32_t *)(btable_ep[ep_num].tx_addr * 2U + USBD_RAM);
 
-        for (n = 0U; n < (bytes + 1U) / 2U; n++) {
-            *write_addr++ = *((uint16_t*)user_fifo);
+        for (n = 0U; n < (bytes + 1U) / 2U; n++)
+        {
+            *write_addr++ = *((uint16_t *)user_fifo);
             user_fifo += 2U;
         }
     }
@@ -490,31 +542,40 @@ static void usbd_ep_data_write (uint8_t *user_fifo, uint8_t ep_num, uint16_t byt
     \param[out] none
     \retval     none
 */
-static uint16_t usbd_ep_data_read (uint8_t *user_fifo, uint8_t ep_num, uint8_t buf_kind)
+static uint16_t usbd_ep_data_read(uint8_t *user_fifo, uint8_t ep_num, uint8_t buf_kind)
 {
     uint16_t n = 0U, bytes = 0U;
     uint32_t *read_addr = NULL;
 
-    if ((uint8_t)EP_BUF_SNG == buf_kind) {
+    if ((uint8_t)EP_BUF_SNG == buf_kind)
+    {
         bytes = (uint16_t)(btable_ep[ep_num].rx_count & EPRCNT_CNT);
 
         read_addr = (uint32_t *)(btable_ep[ep_num].rx_addr * 2U + USBD_RAM);
-    } else if ((uint8_t)EP_BUF_DBL == buf_kind) {
-        if (USBD_EPxCS(ep_num) & EPxCS_TX_DTG) {
+    }
+    else if ((uint8_t)EP_BUF_DBL == buf_kind)
+    {
+        if (USBD_EPxCS(ep_num) & EPxCS_TX_DTG)
+        {
             bytes = (uint16_t)(btable_ep[ep_num].tx_count & EPRCNT_CNT);
 
             read_addr = (uint32_t *)(btable_ep[ep_num].tx_addr * 2U + USBD_RAM);
-        } else {
+        }
+        else
+        {
             bytes = (uint16_t)(btable_ep[ep_num].rx_count & EPRCNT_CNT);
 
             read_addr = (uint32_t *)(btable_ep[ep_num].rx_addr * 2U + USBD_RAM);
         }
-    } else {
+    }
+    else
+    {
         return 0U;
     }
 
-    for (n = 0U; n < (bytes + 1U) / 2U; n++) {
-        *((uint16_t*)user_fifo) = (uint16_t)*read_addr++;
+    for (n = 0U; n < (bytes + 1U) / 2U; n++)
+    {
+        *((uint16_t *)user_fifo) = (uint16_t)*read_addr++;
         user_fifo += 2U;
     }
 
@@ -529,7 +590,7 @@ static uint16_t usbd_ep_data_read (uint8_t *user_fifo, uint8_t ep_num, uint8_t b
     \param[out] none
     \retval     none
 */
-static void lowpower_mode_exit (void)
+static void lowpower_mode_exit(void)
 {
     /* restore system clock */
 
@@ -538,14 +599,16 @@ static void lowpower_mode_exit (void)
     rcu_osci_on(RCU_IRC8M);
 
     /* wait till IRC8M is ready */
-    while (RESET == rcu_flag_get(RCU_FLAG_IRC8MSTB)) {
+    while (RESET == rcu_flag_get(RCU_FLAG_IRC8MSTB))
+    {
     }
 #else
     /* enable HXTAL */
     rcu_osci_on(RCU_HXTAL);
 
     /* wait till HXTAL is ready */
-    while(RESET == rcu_flag_get(RCU_FLAG_HXTALSTB)) {
+    while (RESET == rcu_flag_get(RCU_FLAG_HXTALSTB))
+    {
     }
 #endif
 
@@ -553,14 +616,16 @@ static void lowpower_mode_exit (void)
     rcu_osci_on(RCU_PLL_CK);
 
     /* wait till PLL is ready */
-    while(RESET == rcu_flag_get(RCU_FLAG_PLLSTB)) {
+    while (RESET == rcu_flag_get(RCU_FLAG_PLLSTB))
+    {
     }
 
     /* select PLL as system clock source */
     rcu_system_clock_source_config(RCU_CKSYSSRC_PLL);
 
     /* wait till PLL is used as system clock source */
-    while(0x08U != rcu_system_clock_source_get()) {
+    while (0x08U != rcu_system_clock_source_get())
+    {
     }
 
     /* low power sleep on exit disabled */
@@ -575,15 +640,17 @@ static void lowpower_mode_exit (void)
     \param[out] none
     \retval     none
 */
-static void usbd_resume (usb_dev *udev)
+static void usbd_resume(usb_dev *udev)
 {
 #ifdef LPM_ENABLED
-    if(1 == udev->lpm.L1_remote_wakeup){
+    if (1 == udev->lpm.L1_remote_wakeup)
+    {
         USBD_CTL |= CTL_L1RSREQ;
     }
 #endif /* LPM_ENABLED */
 
-    if(1U == usbd_core.dev->pm.remote_wakeup){
+    if (1U == usbd_core.dev->pm.remote_wakeup)
+    {
         /* make USB resume */
         USBD_CTL |= CTL_RSREQ;
     }
@@ -595,10 +662,10 @@ static void usbd_resume (usb_dev *udev)
     \param[out] none
     \retval     none
 */
-static void usbd_leave_suspend (void)
+static void usbd_leave_suspend(void)
 {
     /* clear low_power mode bit in USBD_CTL */
-   USBD_CTL &= ~CTL_LOWM;
+    USBD_CTL &= ~CTL_LOWM;
 
 #ifdef USBD_LOWPWR_MODE_ENABLE
 
@@ -617,7 +684,7 @@ static void usbd_leave_suspend (void)
     \param[out] none
     \retval     none
 */
-static void usbd_suspend (void)
+static void usbd_suspend(void)
 {
     /* set USB module to suspend and low-power mode */
     USBD_CTL |= CTL_SETSPS | CTL_LOWM;
@@ -625,10 +692,13 @@ static void usbd_suspend (void)
 #ifdef USBD_LOWPWR_MODE_ENABLE
 
     /* check wakeup flag is set */
-    if (0U == (USBD_INTF & INTF_WKUPIF)) {
+    if (0U == (USBD_INTF & INTF_WKUPIF))
+    {
         /* enter DEEP_SLEEP mode with LDO in low power mode */
         pmu_to_deepsleepmode(PMU_LDO_LOWPOWER, WFI_CMD);
-    } else {
+    }
+    else
+    {
         /* clear wakeup interrupt flag */
         CLR(WKUPIF);
 

@@ -11,32 +11,32 @@
 /*
     Copyright (c) 2020, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
 #include "gd32f10x_exti.h"
 
-#define EXTI_REG_RESET_VALUE            ((uint32_t)0x00000000U)
+#define EXTI_REG_RESET_VALUE ((uint32_t)0x00000000U)
 
 /*!
     \brief      deinitialize the EXTI
@@ -48,9 +48,9 @@ void exti_deinit(void)
 {
     /* reset the value of all the EXTI registers */
     EXTI_INTEN = EXTI_REG_RESET_VALUE;
-    EXTI_EVEN  = EXTI_REG_RESET_VALUE;
-    EXTI_RTEN  = EXTI_REG_RESET_VALUE;
-    EXTI_FTEN  = EXTI_REG_RESET_VALUE;
+    EXTI_EVEN = EXTI_REG_RESET_VALUE;
+    EXTI_RTEN = EXTI_REG_RESET_VALUE;
+    EXTI_FTEN = EXTI_REG_RESET_VALUE;
     EXTI_SWIEV = EXTI_REG_RESET_VALUE;
 }
 
@@ -79,9 +79,10 @@ void exti_init(exti_line_enum linex, exti_mode_enum mode, exti_trig_type_enum tr
     EXTI_EVEN &= ~(uint32_t)linex;
     EXTI_RTEN &= ~(uint32_t)linex;
     EXTI_FTEN &= ~(uint32_t)linex;
-    
+
     /* set the EXTI mode and enable the interrupts or events from EXTI line x */
-    switch(mode){
+    switch (mode)
+    {
     case EXTI_INTERRUPT:
         EXTI_INTEN |= (uint32_t)linex;
         break;
@@ -91,9 +92,10 @@ void exti_init(exti_line_enum linex, exti_mode_enum mode, exti_trig_type_enum tr
     default:
         break;
     }
-    
+
     /* set the EXTI trigger type */
-    switch(trig_type){
+    switch (trig_type)
+    {
     case EXTI_TRIG_RISING:
         EXTI_RTEN |= (uint32_t)linex;
         EXTI_FTEN &= ~(uint32_t)linex;
@@ -174,11 +176,14 @@ void exti_event_disable(exti_line_enum linex)
 */
 FlagStatus exti_flag_get(exti_line_enum linex)
 {
-    if(RESET != (EXTI_PD & (uint32_t)linex)){
+    if (RESET != (EXTI_PD & (uint32_t)linex))
+    {
         return SET;
-    }else{
+    }
+    else
+    {
         return RESET;
-    } 
+    }
 }
 
 /*!
@@ -204,9 +209,12 @@ void exti_flag_clear(exti_line_enum linex)
 */
 FlagStatus exti_interrupt_flag_get(exti_line_enum linex)
 {
-    if(RESET != (EXTI_PD & (uint32_t)linex)){
+    if (RESET != (EXTI_PD & (uint32_t)linex))
+    {
         return SET;
-    }else{
+    }
+    else
+    {
         return RESET;
     }
 }

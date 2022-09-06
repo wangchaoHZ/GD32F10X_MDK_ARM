@@ -9,29 +9,29 @@
 /*
     Copyright (c) 2022, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
-*/ 
+*/
 
 #ifndef __USBH_MSC_BBB_H
 #define __USBH_MSC_BBB_H
@@ -39,21 +39,21 @@ OF SUCH DAMAGE.
 #include "usbh_enum.h"
 #include "msc_bbb.h"
 
-typedef union 
+typedef union
 {
     msc_bbb_cbw field;
 
     uint8_t CBWArray[31];
-}usbh_cbw_pkt;
+} usbh_cbw_pkt;
 
 typedef union
 {
     msc_bbb_csw field;
 
     uint8_t CSWArray[13];
-}usbh_csw_pkt;
+} usbh_csw_pkt;
 
-enum usbh_msc_state 
+enum usbh_msc_state
 {
     USBH_MSC_BBB_INIT_STATE = 0U,
     USBH_MSC_BBB_RESET,
@@ -108,47 +108,47 @@ typedef enum
 
 typedef struct
 {
-    uint8_t                *pbuf;
-    uint32_t                data[16];
-    bbb_state               state;
-    bbb_state               prev_state;
-    bbb_cmd_state           cmd_state;
-    usbh_cbw_pkt            cbw;
-    usbh_csw_pkt            csw;
+    uint8_t *pbuf;
+    uint32_t data[16];
+    bbb_state state;
+    bbb_state prev_state;
+    bbb_cmd_state cmd_state;
+    usbh_cbw_pkt cbw;
+    usbh_csw_pkt csw;
 } bbb_handle;
 
-#define USBH_MSC_BBB_CBW_TAG                0x20304050U
+#define USBH_MSC_BBB_CBW_TAG 0x20304050U
 
-#define USBH_MSC_CSW_MAX_LENGTH             63U
+#define USBH_MSC_CSW_MAX_LENGTH 63U
 
-#define USBH_MSC_SEND_CSW_DISABLE           0U
-#define USBH_MSC_SEND_CSW_ENABLE            1U
+#define USBH_MSC_SEND_CSW_DISABLE 0U
+#define USBH_MSC_SEND_CSW_ENABLE 1U
 
-#define USBH_MSC_DIR_IN                     0U
-#define USBH_MSC_DIR_OUT                    1U
-#define USBH_MSC_BOTH_DIR                   2U
+#define USBH_MSC_DIR_IN 0U
+#define USBH_MSC_DIR_OUT 1U
+#define USBH_MSC_BOTH_DIR 2U
 
-#define USBH_MSC_PAGE_LENGTH                512U
+#define USBH_MSC_PAGE_LENGTH 512U
 
-#define CBW_CB_LENGTH                       16U
-#define CBW_LENGTH                          10U
-#define CBW_LENGTH_TEST_UNIT_READY          0U
+#define CBW_CB_LENGTH 16U
+#define CBW_LENGTH 10U
+#define CBW_LENGTH_TEST_UNIT_READY 0U
 
-#define MAX_BULK_STALL_COUNT_LIMIT          0x04U   /*!< If STALL is seen on Bulk 
-                                                      Endpoint continously, this means 
-                                                      that device and Host has phase error
-                                                      Hence a Reset is needed */
+#define MAX_BULK_STALL_COUNT_LIMIT 0x04U /*!< If STALL is seen on Bulk          \
+                                           Endpoint continously, this means     \
+                                           that device and Host has phase error \
+                                           Hence a Reset is needed */
 
 /* function declarations */
 /* initialize the mass storage parameters */
-void usbh_msc_bbb_init (usbh_host *uhost);
+void usbh_msc_bbb_init(usbh_host *uhost);
 /* manage the different states of BOT transfer and updates the status to upper layer */
-usbh_status usbh_msc_bbb_process (usbh_host *uhost, uint8_t lun);
+usbh_status usbh_msc_bbb_process(usbh_host *uhost, uint8_t lun);
 /* manages the different error handling for stall */
-usbh_status usbh_msc_bbb_abort (usbh_host *uhost, uint8_t direction);
+usbh_status usbh_msc_bbb_abort(usbh_host *uhost, uint8_t direction);
 /* reset MSC bot request structure */
-usbh_status usbh_msc_bbb_reset (usbh_host *uhost);
+usbh_status usbh_msc_bbb_reset(usbh_host *uhost);
 /* decode the CSW received by the device and updates the same to upper layer */
-bbb_csw_status usbh_msc_csw_decode (usbh_host *uhost);
+bbb_csw_status usbh_msc_csw_decode(usbh_host *uhost);
 
 #endif /* __USBH_MSC_BBB_H */

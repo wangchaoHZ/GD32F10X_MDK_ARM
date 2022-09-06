@@ -11,63 +11,64 @@
 /*
     Copyright (c) 2020, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
 
 #include "gd32f10x_adc.h"
 
 /* discontinuous mode macro*/
-#define  ADC_CHANNEL_LENGTH_SUBTRACT_ONE            ((uint8_t)1U)
+#define ADC_CHANNEL_LENGTH_SUBTRACT_ONE ((uint8_t)1U)
 
 /* ADC regular channel macro */
-#define  ADC_REGULAR_CHANNEL_RANK_SIX               ((uint8_t)6U)
-#define  ADC_REGULAR_CHANNEL_RANK_TWELVE            ((uint8_t)12U)
-#define  ADC_REGULAR_CHANNEL_RANK_SIXTEEN           ((uint8_t)16U)
-#define  ADC_REGULAR_CHANNEL_RANK_LENGTH            ((uint8_t)5U)
+#define ADC_REGULAR_CHANNEL_RANK_SIX ((uint8_t)6U)
+#define ADC_REGULAR_CHANNEL_RANK_TWELVE ((uint8_t)12U)
+#define ADC_REGULAR_CHANNEL_RANK_SIXTEEN ((uint8_t)16U)
+#define ADC_REGULAR_CHANNEL_RANK_LENGTH ((uint8_t)5U)
 
 /* ADC sampling time macro */
-#define  ADC_CHANNEL_SAMPLE_TEN                     ((uint8_t)10U)
-#define  ADC_CHANNEL_SAMPLE_EIGHTEEN                ((uint8_t)18U)
-#define  ADC_CHANNEL_SAMPLE_LENGTH                  ((uint8_t)3U)
+#define ADC_CHANNEL_SAMPLE_TEN ((uint8_t)10U)
+#define ADC_CHANNEL_SAMPLE_EIGHTEEN ((uint8_t)18U)
+#define ADC_CHANNEL_SAMPLE_LENGTH ((uint8_t)3U)
 
 /* ADC inserted channel macro */
-#define  ADC_INSERTED_CHANNEL_RANK_LENGTH           ((uint8_t)5U)
-#define  ADC_INSERTED_CHANNEL_SHIFT_LENGTH          ((uint8_t)15U)
+#define ADC_INSERTED_CHANNEL_RANK_LENGTH ((uint8_t)5U)
+#define ADC_INSERTED_CHANNEL_SHIFT_LENGTH ((uint8_t)15U)
 
 /* ADC inserted channel offset macro */
-#define  ADC_OFFSET_LENGTH                          ((uint8_t)3U)
-#define  ADC_OFFSET_SHIFT_LENGTH                    ((uint8_t)4U)
+#define ADC_OFFSET_LENGTH ((uint8_t)3U)
+#define ADC_OFFSET_SHIFT_LENGTH ((uint8_t)4U)
 
 /*!
-    \brief      reset ADC 
+    \brief      reset ADC
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[out] none
     \retval     none
 */
 void adc_deinit(uint32_t adc_periph)
 {
-    switch(adc_periph){
+    switch (adc_periph)
+    {
     case ADC0:
         /* reset ADC0 */
         rcu_periph_reset_enable(RCU_ADC0RST);
@@ -126,37 +127,46 @@ void adc_mode_config(uint32_t mode)
 */
 void adc_special_function_config(uint32_t adc_periph, uint32_t function, ControlStatus newvalue)
 {
-    if(newvalue){
-        if(0U != (function & ADC_SCAN_MODE)){
+    if (newvalue)
+    {
+        if (0U != (function & ADC_SCAN_MODE))
+        {
             /* enable scan mode */
             ADC_CTL0(adc_periph) |= ADC_SCAN_MODE;
         }
-        if(0U != (function & ADC_INSERTED_CHANNEL_AUTO)){
+        if (0U != (function & ADC_INSERTED_CHANNEL_AUTO))
+        {
             /* enable inserted channel group convert automatically */
             ADC_CTL0(adc_periph) |= ADC_INSERTED_CHANNEL_AUTO;
-        } 
-        if(0U != (function & ADC_CONTINUOUS_MODE)){
+        }
+        if (0U != (function & ADC_CONTINUOUS_MODE))
+        {
             /* enable continuous mode */
             ADC_CTL1(adc_periph) |= ADC_CONTINUOUS_MODE;
-        }        
-    }else{
-        if(0U != (function & ADC_SCAN_MODE)){
+        }
+    }
+    else
+    {
+        if (0U != (function & ADC_SCAN_MODE))
+        {
             /* disable scan mode */
             ADC_CTL0(adc_periph) &= ~ADC_SCAN_MODE;
         }
-        if(0U != (function & ADC_INSERTED_CHANNEL_AUTO)){
+        if (0U != (function & ADC_INSERTED_CHANNEL_AUTO))
+        {
             /* disable inserted channel group convert automatically */
             ADC_CTL0(adc_periph) &= ~ADC_INSERTED_CHANNEL_AUTO;
-        } 
-        if(0U != (function & ADC_CONTINUOUS_MODE)){
+        }
+        if (0U != (function & ADC_CONTINUOUS_MODE))
+        {
             /* disable continuous mode */
             ADC_CTL1(adc_periph) &= ~ADC_CONTINUOUS_MODE;
-        }       
+        }
     }
 }
 
 /*!
-    \brief      configure ADC data alignment 
+    \brief      configure ADC data alignment
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  data_alignment: data alignment select
                 only one parameter can be selected which is shown as below:
@@ -167,10 +177,13 @@ void adc_special_function_config(uint32_t adc_periph, uint32_t function, Control
 */
 void adc_data_alignment_config(uint32_t adc_periph, uint32_t data_alignment)
 {
-    if(ADC_DATAALIGN_RIGHT != data_alignment){
+    if (ADC_DATAALIGN_RIGHT != data_alignment)
+    {
         /* MSB alignment */
         ADC_CTL1(adc_periph) |= ADC_CTL1_DAL;
-    }else{
+    }
+    else
+    {
         /* LSB alignment */
         ADC_CTL1(adc_periph) &= ~((uint32_t)ADC_CTL1_DAL);
     }
@@ -184,10 +197,11 @@ void adc_data_alignment_config(uint32_t adc_periph, uint32_t data_alignment)
 */
 void adc_enable(uint32_t adc_periph)
 {
-    if(RESET == (ADC_CTL1(adc_periph) & ADC_CTL1_ADCON)){
+    if (RESET == (ADC_CTL1(adc_periph) & ADC_CTL1_ADCON))
+    {
         /* enable ADC */
         ADC_CTL1(adc_periph) |= (uint32_t)ADC_CTL1_ADCON;
-    }       
+    }
 }
 
 /*!
@@ -211,14 +225,16 @@ void adc_disable(uint32_t adc_periph)
 void adc_calibration_enable(uint32_t adc_periph)
 {
     /* reset the selected ADC1 calibration registers */
-    ADC_CTL1(adc_periph) |= (uint32_t) ADC_CTL1_RSTCLB;
+    ADC_CTL1(adc_periph) |= (uint32_t)ADC_CTL1_RSTCLB;
     /* check the RSTCLB bit state */
-    while(RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_RSTCLB)){
+    while (RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_RSTCLB))
+    {
     }
     /* enable ADC calibration process */
     ADC_CTL1(adc_periph) |= ADC_CTL1_CLB;
     /* check the CLB bit state */
-    while(RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_CLB)){
+    while (RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_CLB))
+    {
     }
 }
 
@@ -247,7 +263,7 @@ void adc_tempsensor_vrefint_disable(void)
 }
 
 /*!
-    \brief      enable DMA request 
+    \brief      enable DMA request
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[out] none
     \retval     none
@@ -259,7 +275,7 @@ void adc_dma_mode_enable(uint32_t adc_periph)
 }
 
 /*!
-    \brief      disable DMA request 
+    \brief      disable DMA request
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[out] none
     \retval     none
@@ -271,7 +287,7 @@ void adc_dma_mode_disable(uint32_t adc_periph)
 }
 
 /*!
-    \brief      configure ADC discontinuous mode 
+    \brief      configure ADC discontinuous mode
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_channel_group: select the channel group
                 only one parameter can be selected which is shown as below:
@@ -287,7 +303,8 @@ void adc_discontinuous_mode_config(uint32_t adc_periph, uint8_t adc_channel_grou
 {
     /* disable discontinuous mode of regular & inserted channel */
     ADC_CTL0(adc_periph) &= ~((uint32_t)(ADC_CTL0_DISRC | ADC_CTL0_DISIC));
-    switch(adc_channel_group){
+    switch (adc_channel_group)
+    {
     case ADC_REGULAR_CHANNEL:
         /* config the number of conversions in discontinuous mode */
         ADC_CTL0(adc_periph) &= ~((uint32_t)ADC_CTL0_DISNUM);
@@ -321,16 +338,17 @@ void adc_discontinuous_mode_config(uint32_t adc_periph, uint8_t adc_channel_grou
 */
 void adc_channel_length_config(uint32_t adc_periph, uint8_t adc_channel_group, uint32_t length)
 {
-    switch(adc_channel_group){
+    switch (adc_channel_group)
+    {
     case ADC_REGULAR_CHANNEL:
         /* configure the length of regular channel group */
         ADC_RSQ0(adc_periph) &= ~((uint32_t)ADC_RSQ0_RL);
-        ADC_RSQ0(adc_periph) |= RSQ0_RL((uint32_t)(length-ADC_CHANNEL_LENGTH_SUBTRACT_ONE));
+        ADC_RSQ0(adc_periph) |= RSQ0_RL((uint32_t)(length - ADC_CHANNEL_LENGTH_SUBTRACT_ONE));
         break;
     case ADC_INSERTED_CHANNEL:
         /* configure the length of inserted channel group */
         ADC_ISQ(adc_periph) &= ~((uint32_t)ADC_ISQ_IL);
-        ADC_ISQ(adc_periph) |= ISQ_IL((uint32_t)(length-ADC_CHANNEL_LENGTH_SUBTRACT_ONE));
+        ADC_ISQ(adc_periph) |= ISQ_IL((uint32_t)(length - ADC_CHANNEL_LENGTH_SUBTRACT_ONE));
         break;
     default:
         break;
@@ -338,12 +356,12 @@ void adc_channel_length_config(uint32_t adc_periph, uint8_t adc_channel_group, u
 }
 
 /*!
-    \brief      configure ADC regular channel 
+    \brief      configure ADC regular channel
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  rank: the regular group sequence rank,this parameter must be between 0 to 15
     \param[in]  adc_channel: the selected ADC channel
                 only one parameter can be selected which is shown as below:
-      \arg        ADC_CHANNEL_x(x=0..17)(x=16 and x=17 are only for ADC0): ADC Channelx 
+      \arg        ADC_CHANNEL_x(x=0..17)(x=16 and x=17 are only for ADC0): ADC Channelx
     \param[in]  sample_time: the sample time value
                 only one parameter can be selected which is shown as below:
       \arg        ADC_SAMPLETIME_1POINT5: 1.5 cycles
@@ -359,54 +377,66 @@ void adc_channel_length_config(uint32_t adc_periph, uint8_t adc_channel_group, u
 */
 void adc_regular_channel_config(uint32_t adc_periph, uint8_t rank, uint8_t adc_channel, uint32_t sample_time)
 {
-    uint32_t rsq,sampt;
-    
+    uint32_t rsq, sampt;
+
     /* ADC regular sequence config */
-    if(rank < ADC_REGULAR_CHANNEL_RANK_SIX){
+    if (rank < ADC_REGULAR_CHANNEL_RANK_SIX)
+    {
         /* the regular group sequence rank is smaller than six */
         rsq = ADC_RSQ2(adc_periph);
-        rsq &=  ~((uint32_t)(ADC_RSQX_RSQN << (ADC_REGULAR_CHANNEL_RANK_LENGTH*rank)));
+        rsq &= ~((uint32_t)(ADC_RSQX_RSQN << (ADC_REGULAR_CHANNEL_RANK_LENGTH * rank)));
         /* the channel number is written to these bits to select a channel as the nth conversion in the regular channel group */
-        rsq |= ((uint32_t)adc_channel << (ADC_REGULAR_CHANNEL_RANK_LENGTH*rank));
+        rsq |= ((uint32_t)adc_channel << (ADC_REGULAR_CHANNEL_RANK_LENGTH * rank));
         ADC_RSQ2(adc_periph) = rsq;
-    }else if(rank < ADC_REGULAR_CHANNEL_RANK_TWELVE){
+    }
+    else if (rank < ADC_REGULAR_CHANNEL_RANK_TWELVE)
+    {
         /* the regular group sequence rank is smaller than twelve */
         rsq = ADC_RSQ1(adc_periph);
-        rsq &= ~((uint32_t)(ADC_RSQX_RSQN << (ADC_REGULAR_CHANNEL_RANK_LENGTH*(rank-ADC_REGULAR_CHANNEL_RANK_SIX))));
+        rsq &= ~((uint32_t)(ADC_RSQX_RSQN << (ADC_REGULAR_CHANNEL_RANK_LENGTH * (rank - ADC_REGULAR_CHANNEL_RANK_SIX))));
         /* the channel number is written to these bits to select a channel as the nth conversion in the regular channel group */
-        rsq |= ((uint32_t)adc_channel << (ADC_REGULAR_CHANNEL_RANK_LENGTH*(rank-ADC_REGULAR_CHANNEL_RANK_SIX)));
+        rsq |= ((uint32_t)adc_channel << (ADC_REGULAR_CHANNEL_RANK_LENGTH * (rank - ADC_REGULAR_CHANNEL_RANK_SIX)));
         ADC_RSQ1(adc_periph) = rsq;
-    }else if(rank < ADC_REGULAR_CHANNEL_RANK_SIXTEEN){
+    }
+    else if (rank < ADC_REGULAR_CHANNEL_RANK_SIXTEEN)
+    {
         /* the regular group sequence rank is smaller than sixteen */
         rsq = ADC_RSQ0(adc_periph);
-        rsq &= ~((uint32_t)(ADC_RSQX_RSQN << (ADC_REGULAR_CHANNEL_RANK_LENGTH*(rank-ADC_REGULAR_CHANNEL_RANK_TWELVE))));
+        rsq &= ~((uint32_t)(ADC_RSQX_RSQN << (ADC_REGULAR_CHANNEL_RANK_LENGTH * (rank - ADC_REGULAR_CHANNEL_RANK_TWELVE))));
         /* the channel number is written to these bits to select a channel as the nth conversion in the regular channel group */
-        rsq |= ((uint32_t)adc_channel << (ADC_REGULAR_CHANNEL_RANK_LENGTH*(rank-ADC_REGULAR_CHANNEL_RANK_TWELVE)));
+        rsq |= ((uint32_t)adc_channel << (ADC_REGULAR_CHANNEL_RANK_LENGTH * (rank - ADC_REGULAR_CHANNEL_RANK_TWELVE)));
         ADC_RSQ0(adc_periph) = rsq;
-    }else{
     }
-    
+    else
+    {
+    }
+
     /* ADC sampling time config */
-    if(adc_channel < ADC_CHANNEL_SAMPLE_TEN){
+    if (adc_channel < ADC_CHANNEL_SAMPLE_TEN)
+    {
         /* the regular group sequence rank is smaller than ten */
         sampt = ADC_SAMPT1(adc_periph);
-        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH*adc_channel)));
+        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH * adc_channel)));
         /* channel sample time set*/
-        sampt |= (uint32_t)(sample_time << (ADC_CHANNEL_SAMPLE_LENGTH*adc_channel));
+        sampt |= (uint32_t)(sample_time << (ADC_CHANNEL_SAMPLE_LENGTH * adc_channel));
         ADC_SAMPT1(adc_periph) = sampt;
-    }else if(adc_channel < ADC_CHANNEL_SAMPLE_EIGHTEEN){
+    }
+    else if (adc_channel < ADC_CHANNEL_SAMPLE_EIGHTEEN)
+    {
         /* the regular group sequence rank is smaller than eighteen */
         sampt = ADC_SAMPT0(adc_periph);
-        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH*(adc_channel-ADC_CHANNEL_SAMPLE_TEN))));
+        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH * (adc_channel - ADC_CHANNEL_SAMPLE_TEN))));
         /* channel sample time set*/
-        sampt |= (uint32_t)(sample_time << (ADC_CHANNEL_SAMPLE_LENGTH*(adc_channel-ADC_CHANNEL_SAMPLE_TEN)));
+        sampt |= (uint32_t)(sample_time << (ADC_CHANNEL_SAMPLE_LENGTH * (adc_channel - ADC_CHANNEL_SAMPLE_TEN)));
         ADC_SAMPT0(adc_periph) = sampt;
-    }else{
+    }
+    else
+    {
     }
 }
 
 /*!
-    \brief      configure ADC inserted channel 
+    \brief      configure ADC inserted channel
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  rank: the inserted group sequencer rank,this parameter must be between 0 to 3
     \param[in]  adc_channel: the selected ADC channel
@@ -428,36 +458,41 @@ void adc_regular_channel_config(uint32_t adc_periph, uint8_t rank, uint8_t adc_c
 void adc_inserted_channel_config(uint32_t adc_periph, uint8_t rank, uint8_t adc_channel, uint32_t sample_time)
 {
     uint8_t inserted_length;
-    uint32_t isq,sampt;
+    uint32_t isq, sampt;
     /* get inserted channel group length */
-    inserted_length = (uint8_t)GET_BITS(ADC_ISQ(adc_periph) , 20U , 21U);
+    inserted_length = (uint8_t)GET_BITS(ADC_ISQ(adc_periph), 20U, 21U);
     /* the channel number is written to these bits to select a channel as the nth conversion in the inserted channel group */
     isq = ADC_ISQ(adc_periph);
-    isq &= ~((uint32_t)(ADC_ISQ_ISQN << (ADC_INSERTED_CHANNEL_SHIFT_LENGTH-(inserted_length-rank)*ADC_INSERTED_CHANNEL_RANK_LENGTH)));
-    isq |= ((uint32_t)adc_channel << (ADC_INSERTED_CHANNEL_SHIFT_LENGTH-(inserted_length-rank)*ADC_INSERTED_CHANNEL_RANK_LENGTH));
+    isq &= ~((uint32_t)(ADC_ISQ_ISQN << (ADC_INSERTED_CHANNEL_SHIFT_LENGTH - (inserted_length - rank) * ADC_INSERTED_CHANNEL_RANK_LENGTH)));
+    isq |= ((uint32_t)adc_channel << (ADC_INSERTED_CHANNEL_SHIFT_LENGTH - (inserted_length - rank) * ADC_INSERTED_CHANNEL_RANK_LENGTH));
     ADC_ISQ(adc_periph) = isq;
 
-    /* ADC sampling time config */  
-    if(adc_channel < ADC_CHANNEL_SAMPLE_TEN){
+    /* ADC sampling time config */
+    if (adc_channel < ADC_CHANNEL_SAMPLE_TEN)
+    {
         /* the inserted group sequence rank is smaller than ten */
         sampt = ADC_SAMPT1(adc_periph);
-        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH*adc_channel)));
+        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH * adc_channel)));
         /* channel sample time set*/
-        sampt |= (uint32_t) sample_time << (ADC_CHANNEL_SAMPLE_LENGTH*adc_channel);
+        sampt |= (uint32_t)sample_time << (ADC_CHANNEL_SAMPLE_LENGTH * adc_channel);
         ADC_SAMPT1(adc_periph) = sampt;
-    }else if(adc_channel < ADC_CHANNEL_SAMPLE_EIGHTEEN){
+    }
+    else if (adc_channel < ADC_CHANNEL_SAMPLE_EIGHTEEN)
+    {
         /* the inserted group sequence rank is smaller than eighteen */
         sampt = ADC_SAMPT0(adc_periph);
-        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH*(adc_channel-ADC_CHANNEL_SAMPLE_TEN))));
+        sampt &= ~((uint32_t)(ADC_SAMPTX_SPTN << (ADC_CHANNEL_SAMPLE_LENGTH * (adc_channel - ADC_CHANNEL_SAMPLE_TEN))));
         /* channel sample time set*/
-        sampt |= ((uint32_t)sample_time << (ADC_CHANNEL_SAMPLE_LENGTH*(adc_channel-ADC_CHANNEL_SAMPLE_TEN)));
+        sampt |= ((uint32_t)sample_time << (ADC_CHANNEL_SAMPLE_LENGTH * (adc_channel - ADC_CHANNEL_SAMPLE_TEN)));
         ADC_SAMPT0(adc_periph) = sampt;
-    }else{
+    }
+    else
+    {
     }
 }
 
 /*!
-    \brief      configure ADC inserted channel offset 
+    \brief      configure ADC inserted channel offset
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  inserted_channel: insert channel select
                 only one parameter can be selected
@@ -474,19 +509,20 @@ void adc_inserted_channel_offset_config(uint32_t adc_periph, uint8_t inserted_ch
     uint8_t inserted_length;
     uint32_t num = 0U;
 
-    inserted_length = (uint8_t)GET_BITS(ADC_ISQ(adc_periph) , 20U , 21U);
+    inserted_length = (uint8_t)GET_BITS(ADC_ISQ(adc_periph), 20U, 21U);
     num = ((uint32_t)ADC_OFFSET_LENGTH - ((uint32_t)inserted_length - (uint32_t)inserted_channel));
-    
-    if(num <= ADC_OFFSET_LENGTH){
+
+    if (num <= ADC_OFFSET_LENGTH)
+    {
         /* calculate the offset of the register */
         num = num * ADC_OFFSET_SHIFT_LENGTH;
         /* config the offset of the selected channels */
         REG32((adc_periph) + 0x14U + num) = IOFFX_IOFF((uint32_t)offset);
-    }  
+    }
 }
 
 /*!
-    \brief      configure ADC external trigger source 
+    \brief      configure ADC external trigger source
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_channel_group: select the channel group
                 only one parameter can be selected which is shown as below:
@@ -495,45 +531,46 @@ void adc_inserted_channel_offset_config(uint32_t adc_periph, uint8_t inserted_ch
     \param[in]  external_trigger_source: regular or inserted group trigger source
                 only one parameter can be selected
                 for regular channel:
-      \arg        ADC0_1_EXTTRIG_REGULAR_T0_CH0: TIMER0 CH0 event select 
-      \arg        ADC0_1_EXTTRIG_REGULAR_T0_CH1: TIMER0 CH1 event select 
-      \arg        ADC0_1_EXTTRIG_REGULAR_T0_CH2: TIMER0 CH2 event select 
-      \arg        ADC0_1_EXTTRIG_REGULAR_T1_CH1: TIMER1 CH1 event select 
-      \arg        ADC0_1_EXTTRIG_REGULAR_T2_TRGO: TIMER2 TRGO event select 
-      \arg        ADC0_1_EXTTRIG_REGULAR_T3_CH3: TIMER3 CH3 event select 
-      \arg        ADC0_1_EXTTRIG_REGULAR_T7_TRGO: TIMER7 TRGO event select 
-      \arg        ADC0_1_EXTTRIG_REGULAR_EXTI_11: external interrupt line 11 
-      \arg        ADC2_EXTTRIG_REGULAR_T2_CH0: TIMER2 CH0 event select 
-      \arg        ADC2_EXTTRIG_REGULAR_T1_CH2: TIMER1 CH2 event select 
-      \arg        ADC2_EXTTRIG_REGULAR_T0_CH2: TIMER0 CH2 event select 
-      \arg        ADC2_EXTTRIG_REGULAR_T7_CH0: TIMER7 CH0 event select 
-      \arg        ADC2_EXTTRIG_REGULAR_T7_TRGO: TIMER7 TRGO event select 
-      \arg        ADC2_EXTTRIG_REGULAR_T4_CH0: TIMER4 CH0 event select 
+      \arg        ADC0_1_EXTTRIG_REGULAR_T0_CH0: TIMER0 CH0 event select
+      \arg        ADC0_1_EXTTRIG_REGULAR_T0_CH1: TIMER0 CH1 event select
+      \arg        ADC0_1_EXTTRIG_REGULAR_T0_CH2: TIMER0 CH2 event select
+      \arg        ADC0_1_EXTTRIG_REGULAR_T1_CH1: TIMER1 CH1 event select
+      \arg        ADC0_1_EXTTRIG_REGULAR_T2_TRGO: TIMER2 TRGO event select
+      \arg        ADC0_1_EXTTRIG_REGULAR_T3_CH3: TIMER3 CH3 event select
+      \arg        ADC0_1_EXTTRIG_REGULAR_T7_TRGO: TIMER7 TRGO event select
+      \arg        ADC0_1_EXTTRIG_REGULAR_EXTI_11: external interrupt line 11
+      \arg        ADC2_EXTTRIG_REGULAR_T2_CH0: TIMER2 CH0 event select
+      \arg        ADC2_EXTTRIG_REGULAR_T1_CH2: TIMER1 CH2 event select
+      \arg        ADC2_EXTTRIG_REGULAR_T0_CH2: TIMER0 CH2 event select
+      \arg        ADC2_EXTTRIG_REGULAR_T7_CH0: TIMER7 CH0 event select
+      \arg        ADC2_EXTTRIG_REGULAR_T7_TRGO: TIMER7 TRGO event select
+      \arg        ADC2_EXTTRIG_REGULAR_T4_CH0: TIMER4 CH0 event select
       \arg        ADC2_EXTTRIG_REGULAR_T4_CH2: TIMER4 CH2 event select
-      \arg        ADC0_1_2_EXTTRIG_REGULAR_NONE: software trigger      
+      \arg        ADC0_1_2_EXTTRIG_REGULAR_NONE: software trigger
                 for inserted channel:
-      \arg        ADC0_1_EXTTRIG_INSERTED_T0_TRGO: TIMER0 TRGO event select 
-      \arg        ADC0_1_EXTTRIG_INSERTED_T0_CH3: TIMER0 CH3 event select 
-      \arg        ADC0_1_EXTTRIG_INSERTED_T1_TRGO: TIMER1 TRGO event select 
-      \arg        ADC0_1_EXTTRIG_INSERTED_T1_CH0: TIMER1 CH0 event select 
-      \arg        ADC0_1_EXTTRIG_INSERTED_T2_CH3: TIMER2 CH3 event select 
-      \arg        ADC0_1_EXTTRIG_INSERTED_T3_TRGO: TIMER3 TRGO event select 
-      \arg        ADC0_1_EXTTRIG_INSERTED_EXTI_15: external interrupt line 15 
-      \arg        ADC0_1_EXTTRIG_INSERTED_T7_CH3: TIMER7 CH3 event select 
-      \arg        ADC2_EXTTRIG_INSERTED_T0_TRGO: TIMER0 TRGO event select 
-      \arg        ADC2_EXTTRIG_INSERTED_T0_CH3: TIMER0 CH3 event select 
-      \arg        ADC2_EXTTRIG_INSERTED_T3_CH2: TIMER3 CH2 event select 
-      \arg        ADC2_EXTTRIG_INSERTED_T7_CH1: TIMER7 CH1 event select 
-      \arg        ADC2_EXTTRIG_INSERTED_T7_CH3: TIMER7 CH3 event select 
+      \arg        ADC0_1_EXTTRIG_INSERTED_T0_TRGO: TIMER0 TRGO event select
+      \arg        ADC0_1_EXTTRIG_INSERTED_T0_CH3: TIMER0 CH3 event select
+      \arg        ADC0_1_EXTTRIG_INSERTED_T1_TRGO: TIMER1 TRGO event select
+      \arg        ADC0_1_EXTTRIG_INSERTED_T1_CH0: TIMER1 CH0 event select
+      \arg        ADC0_1_EXTTRIG_INSERTED_T2_CH3: TIMER2 CH3 event select
+      \arg        ADC0_1_EXTTRIG_INSERTED_T3_TRGO: TIMER3 TRGO event select
+      \arg        ADC0_1_EXTTRIG_INSERTED_EXTI_15: external interrupt line 15
+      \arg        ADC0_1_EXTTRIG_INSERTED_T7_CH3: TIMER7 CH3 event select
+      \arg        ADC2_EXTTRIG_INSERTED_T0_TRGO: TIMER0 TRGO event select
+      \arg        ADC2_EXTTRIG_INSERTED_T0_CH3: TIMER0 CH3 event select
+      \arg        ADC2_EXTTRIG_INSERTED_T3_CH2: TIMER3 CH2 event select
+      \arg        ADC2_EXTTRIG_INSERTED_T7_CH1: TIMER7 CH1 event select
+      \arg        ADC2_EXTTRIG_INSERTED_T7_CH3: TIMER7 CH3 event select
       \arg        ADC2_EXTTRIG_INSERTED_T4_TRGO: TIMER4 TRGO event select
       \arg        ADC2_EXTTRIG_INSERTED_T4_CH3: TIMER4 CH3 event select
-      \arg        ADC0_1_2_EXTTRIG_INSERTED_NONE: software trigger      
+      \arg        ADC0_1_2_EXTTRIG_INSERTED_NONE: software trigger
     \param[out] none
     \retval     none
 */
 void adc_external_trigger_source_config(uint32_t adc_periph, uint8_t adc_channel_group, uint32_t external_trigger_source)
-{   
-    switch(adc_channel_group){
+{
+    switch (adc_channel_group)
+    {
     case ADC_REGULAR_CHANNEL:
         /* configure ADC regular group external trigger source */
         ADC_CTL1(adc_periph) &= ~((uint32_t)ADC_CTL1_ETSRC);
@@ -550,7 +587,7 @@ void adc_external_trigger_source_config(uint32_t adc_periph, uint8_t adc_channel
 }
 
 /*!
-    \brief      configure ADC external trigger 
+    \brief      configure ADC external trigger
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_channel_group: select the channel group
                 one or more parameters can be selected which are shown as below:
@@ -562,29 +599,36 @@ void adc_external_trigger_source_config(uint32_t adc_periph, uint8_t adc_channel
 */
 void adc_external_trigger_config(uint32_t adc_periph, uint8_t adc_channel_group, ControlStatus newvalue)
 {
-    if(newvalue){
-        if(0U != (adc_channel_group & ADC_REGULAR_CHANNEL)){
+    if (newvalue)
+    {
+        if (0U != (adc_channel_group & ADC_REGULAR_CHANNEL))
+        {
             /* enable ADC regular channel group external trigger */
             ADC_CTL1(adc_periph) |= ADC_CTL1_ETERC;
         }
-        if(0U != (adc_channel_group & ADC_INSERTED_CHANNEL)){
+        if (0U != (adc_channel_group & ADC_INSERTED_CHANNEL))
+        {
             /* enable ADC inserted channel group external trigger */
             ADC_CTL1(adc_periph) |= ADC_CTL1_ETEIC;
-        }        
-    }else{
-        if(0U != (adc_channel_group & ADC_REGULAR_CHANNEL)){
+        }
+    }
+    else
+    {
+        if (0U != (adc_channel_group & ADC_REGULAR_CHANNEL))
+        {
             /* disable ADC regular channel group external trigger */
             ADC_CTL1(adc_periph) &= ~ADC_CTL1_ETERC;
         }
-        if(0U != (adc_channel_group & ADC_INSERTED_CHANNEL)){
+        if (0U != (adc_channel_group & ADC_INSERTED_CHANNEL))
+        {
             /* disable ADC regular channel group external trigger */
             ADC_CTL1(adc_periph) &= ~ADC_CTL1_ETEIC;
-        }      
+        }
     }
 }
 
 /*!
-    \brief      enable ADC software trigger 
+    \brief      enable ADC software trigger
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_channel_group: select the channel group
                 one or more parameters can be selected which are shown as below:
@@ -595,18 +639,20 @@ void adc_external_trigger_config(uint32_t adc_periph, uint8_t adc_channel_group,
 */
 void adc_software_trigger_enable(uint32_t adc_periph, uint8_t adc_channel_group)
 {
-    if(0U != (adc_channel_group & ADC_REGULAR_CHANNEL)){
+    if (0U != (adc_channel_group & ADC_REGULAR_CHANNEL))
+    {
         /* enable ADC regular channel group software trigger */
         ADC_CTL1(adc_periph) |= ADC_CTL1_SWRCST;
     }
-    if(0U != (adc_channel_group & ADC_INSERTED_CHANNEL)){
+    if (0U != (adc_channel_group & ADC_INSERTED_CHANNEL))
+    {
         /* enable ADC inserted channel group software trigger */
         ADC_CTL1(adc_periph) |= ADC_CTL1_SWICST;
     }
 }
 
 /*!
-    \brief      read ADC regular group data register 
+    \brief      read ADC regular group data register
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  none
     \param[out] none
@@ -618,7 +664,7 @@ uint16_t adc_regular_data_read(uint32_t adc_periph)
 }
 
 /*!
-    \brief      read ADC inserted group data register 
+    \brief      read ADC inserted group data register
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  inserted_channel: insert channel select
                 only one parameter can be selected
@@ -633,7 +679,8 @@ uint16_t adc_inserted_data_read(uint32_t adc_periph, uint8_t inserted_channel)
 {
     uint32_t idata;
     /* read the data of the selected channel */
-    switch(inserted_channel){
+    switch (inserted_channel)
+    {
     case ADC_INSERTED_CHANNEL_0:
         /* read the data of channel 0 */
         idata = ADC_IDATA0(adc_periph);
@@ -669,9 +716,8 @@ uint32_t adc_sync_mode_convert_value_read(void)
     return ADC_RDATA(ADC0);
 }
 
-
 /*!
-    \brief      configure ADC analog watchdog single channel 
+    \brief      configure ADC analog watchdog single channel
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_channel: the selected ADC channel
                 only one parameter can be selected which is shown as below:
@@ -681,17 +727,17 @@ uint32_t adc_sync_mode_convert_value_read(void)
 */
 void adc_watchdog_single_channel_enable(uint32_t adc_periph, uint8_t adc_channel)
 {
-    ADC_CTL0(adc_periph) &= (uint32_t)~(ADC_CTL0_RWDEN | ADC_CTL0_IWDEN | ADC_CTL0_WDSC | ADC_CTL0_WDCHSEL);
+    ADC_CTL0(adc_periph) &= (uint32_t) ~(ADC_CTL0_RWDEN | ADC_CTL0_IWDEN | ADC_CTL0_WDSC | ADC_CTL0_WDCHSEL);
     /* analog watchdog channel select */
     ADC_CTL0(adc_periph) |= (uint32_t)adc_channel;
     ADC_CTL0(adc_periph) |= (uint32_t)(ADC_CTL0_RWDEN | ADC_CTL0_IWDEN | ADC_CTL0_WDSC);
 }
 
 /*!
-    \brief      configure ADC analog watchdog group channel 
+    \brief      configure ADC analog watchdog group channel
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_channel_group: the channel group use analog watchdog
-                only one parameter can be selected which is shown as below: 
+                only one parameter can be selected which is shown as below:
       \arg        ADC_REGULAR_CHANNEL: regular channel group
       \arg        ADC_INSERTED_CHANNEL: inserted channel group
       \arg        ADC_REGULAR_INSERTED_CHANNEL: both regular and inserted group
@@ -700,16 +746,17 @@ void adc_watchdog_single_channel_enable(uint32_t adc_periph, uint8_t adc_channel
 */
 void adc_watchdog_group_channel_enable(uint32_t adc_periph, uint8_t adc_channel_group)
 {
-    ADC_CTL0(adc_periph) &= (uint32_t)~(ADC_CTL0_RWDEN | ADC_CTL0_IWDEN | ADC_CTL0_WDSC);
+    ADC_CTL0(adc_periph) &= (uint32_t) ~(ADC_CTL0_RWDEN | ADC_CTL0_IWDEN | ADC_CTL0_WDSC);
     /* select the group */
-    switch(adc_channel_group){
+    switch (adc_channel_group)
+    {
     case ADC_REGULAR_CHANNEL:
         /* regular channel analog watchdog enable */
-        ADC_CTL0(adc_periph) |= (uint32_t) ADC_CTL0_RWDEN;
+        ADC_CTL0(adc_periph) |= (uint32_t)ADC_CTL0_RWDEN;
         break;
     case ADC_INSERTED_CHANNEL:
         /* inserted channel analog watchdog enable */
-        ADC_CTL0(adc_periph) |= (uint32_t) ADC_CTL0_IWDEN;
+        ADC_CTL0(adc_periph) |= (uint32_t)ADC_CTL0_IWDEN;
         break;
     case ADC_REGULAR_INSERTED_CHANNEL:
         /* regular and inserted channel analog watchdog enable */
@@ -721,18 +768,18 @@ void adc_watchdog_group_channel_enable(uint32_t adc_periph, uint8_t adc_channel_
 }
 
 /*!
-    \brief      disable ADC analog watchdog 
+    \brief      disable ADC analog watchdog
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[out] none
     \retval     none
 */
 void adc_watchdog_disable(uint32_t adc_periph)
 {
-    ADC_CTL0(adc_periph) &= (uint32_t)~(ADC_CTL0_RWDEN | ADC_CTL0_IWDEN | ADC_CTL0_WDSC | ADC_CTL0_WDCHSEL);
+    ADC_CTL0(adc_periph) &= (uint32_t) ~(ADC_CTL0_RWDEN | ADC_CTL0_IWDEN | ADC_CTL0_WDSC | ADC_CTL0_WDCHSEL);
 }
 
 /*!
-    \brief      configure ADC analog watchdog threshold 
+    \brief      configure ADC analog watchdog threshold
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  low_threshold: analog watchdog low threshold, 0..4095
     \param[in]  high_threshold: analog watchdog high threshold, 0..4095
@@ -761,7 +808,8 @@ void adc_watchdog_threshold_config(uint32_t adc_periph, uint16_t low_threshold, 
 FlagStatus adc_flag_get(uint32_t adc_periph, uint32_t adc_flag)
 {
     FlagStatus reval = RESET;
-    if(ADC_STAT(adc_periph) & adc_flag){
+    if (ADC_STAT(adc_periph) & adc_flag)
+    {
         reval = SET;
     }
     return reval;
@@ -795,7 +843,8 @@ void adc_flag_clear(uint32_t adc_periph, uint32_t adc_flag)
 FlagStatus adc_regular_software_startconv_flag_get(uint32_t adc_periph)
 {
     FlagStatus reval = RESET;
-    if((uint32_t)RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_SWRCST)){
+    if ((uint32_t)RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_SWRCST))
+    {
         reval = SET;
     }
     return reval;
@@ -811,7 +860,8 @@ FlagStatus adc_regular_software_startconv_flag_get(uint32_t adc_periph)
 FlagStatus adc_inserted_software_startconv_flag_get(uint32_t adc_periph)
 {
     FlagStatus reval = RESET;
-    if((uint32_t)RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_SWICST)){
+    if ((uint32_t)RESET != (ADC_CTL1(adc_periph) & ADC_CTL1_SWICST))
+    {
         reval = SET;
     }
     return reval;
@@ -833,25 +883,29 @@ FlagStatus adc_interrupt_flag_get(uint32_t adc_periph, uint32_t adc_interrupt)
     FlagStatus interrupt_flag = RESET;
     uint32_t state;
     /* check the interrupt bits */
-    switch(adc_interrupt){
+    switch (adc_interrupt)
+    {
     case ADC_INT_FLAG_WDE:
         /* get the ADC analog watchdog interrupt bits */
         state = ADC_STAT(adc_periph) & ADC_STAT_WDE;
-        if((ADC_CTL0(adc_periph) & ADC_CTL0_WDEIE) && state){
-          interrupt_flag = SET;
+        if ((ADC_CTL0(adc_periph) & ADC_CTL0_WDEIE) && state)
+        {
+            interrupt_flag = SET;
         }
         break;
     case ADC_INT_FLAG_EOC:
         /* get the ADC end of group conversion interrupt bits */
         state = ADC_STAT(adc_periph) & ADC_STAT_EOC;
-          if((ADC_CTL0(adc_periph) & ADC_CTL0_EOCIE) && state){
+        if ((ADC_CTL0(adc_periph) & ADC_CTL0_EOCIE) && state)
+        {
             interrupt_flag = SET;
-          }
+        }
         break;
     case ADC_INT_FLAG_EOIC:
         /* get the ADC end of inserted group conversion interrupt bits */
         state = ADC_STAT(adc_periph) & ADC_STAT_EOIC;
-        if((ADC_CTL0(adc_periph) & ADC_CTL0_EOICIE) && state){
+        if ((ADC_CTL0(adc_periph) & ADC_CTL0_EOICIE) && state)
+        {
             interrupt_flag = SET;
         }
         break;
@@ -878,7 +932,7 @@ void adc_interrupt_flag_clear(uint32_t adc_periph, uint32_t adc_interrupt)
 }
 
 /*!
-    \brief      enable ADC interrupt 
+    \brief      enable ADC interrupt
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_interrupt: the adc interrupt
                 one or more parameters can be selected which are shown as below:
@@ -891,21 +945,24 @@ void adc_interrupt_flag_clear(uint32_t adc_periph, uint32_t adc_interrupt)
 void adc_interrupt_enable(uint32_t adc_periph, uint32_t adc_interrupt)
 {
     /* enable ADC analog watchdog interrupt */
-    if(0U != (adc_interrupt & ADC_INT_WDE)){
-        ADC_CTL0(adc_periph) |= (uint32_t) ADC_CTL0_WDEIE;
-    }  
+    if (0U != (adc_interrupt & ADC_INT_WDE))
+    {
+        ADC_CTL0(adc_periph) |= (uint32_t)ADC_CTL0_WDEIE;
+    }
     /* enable ADC end of group conversion interrupt */
-    if(0U != (adc_interrupt & ADC_INT_EOC)){      
-        ADC_CTL0(adc_periph) |= (uint32_t) ADC_CTL0_EOCIE;
-    }  
+    if (0U != (adc_interrupt & ADC_INT_EOC))
+    {
+        ADC_CTL0(adc_periph) |= (uint32_t)ADC_CTL0_EOCIE;
+    }
     /* enable ADC end of inserted group conversion interrupt */
-    if(0U != (adc_interrupt & ADC_INT_EOIC)){      
-        ADC_CTL0(adc_periph) |= (uint32_t) ADC_CTL0_EOICIE;
+    if (0U != (adc_interrupt & ADC_INT_EOIC))
+    {
+        ADC_CTL0(adc_periph) |= (uint32_t)ADC_CTL0_EOICIE;
     }
 }
 
 /*!
-    \brief      disable ADC interrupt 
+    \brief      disable ADC interrupt
     \param[in]  adc_periph: ADCx, x=0,1,2
     \param[in]  adc_interrupt: the adc interrupt flag
                 one or more parameters can be selected which are shown as below:
@@ -916,17 +973,20 @@ void adc_interrupt_enable(uint32_t adc_periph, uint32_t adc_interrupt)
     \retval     none
 */
 void adc_interrupt_disable(uint32_t adc_periph, uint32_t adc_interrupt)
-{  
+{
     /* disable ADC analog watchdog interrupt */
-    if(0U != (adc_interrupt & ADC_INT_WDE)){  
-        ADC_CTL0(adc_periph) &= ~(uint32_t) ADC_CTL0_WDEIE;
-    }  
+    if (0U != (adc_interrupt & ADC_INT_WDE))
+    {
+        ADC_CTL0(adc_periph) &= ~(uint32_t)ADC_CTL0_WDEIE;
+    }
     /* disable ADC end of group conversion interrupt */
-    if(0U != (adc_interrupt & ADC_INT_EOC)){      
-        ADC_CTL0(adc_periph) &= ~(uint32_t) ADC_CTL0_EOCIE;
-    }  
+    if (0U != (adc_interrupt & ADC_INT_EOC))
+    {
+        ADC_CTL0(adc_periph) &= ~(uint32_t)ADC_CTL0_EOCIE;
+    }
     /* disable ADC end of inserted group conversion interrupt */
-    if(0U != (adc_interrupt & ADC_INT_EOIC)){      
-        ADC_CTL0(adc_periph) &= ~(uint32_t) ADC_CTL0_EOICIE;
+    if (0U != (adc_interrupt & ADC_INT_EOIC))
+    {
+        ADC_CTL0(adc_periph) &= ~(uint32_t)ADC_CTL0_EOICIE;
     }
 }

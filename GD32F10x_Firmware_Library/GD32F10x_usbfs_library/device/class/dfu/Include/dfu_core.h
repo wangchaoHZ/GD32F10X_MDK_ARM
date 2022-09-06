@@ -39,45 +39,45 @@ OF SUCH DAMAGE.
 #include "usbd_enum.h"
 
 /* DFU class code */
-#define USB_DFU_CLASS                 0xFEU
+#define USB_DFU_CLASS 0xFEU
 
 /* DFU subclass code */
-#define USB_DFU_SUBCLASS_UPGRADE      0x01U
+#define USB_DFU_SUBCLASS_UPGRADE 0x01U
 
 /* DFU protocol code */
-#define USB_DFU_PROTOCL_RUNTIME       0x01U
-#define USB_DFU_PROTOCL_DFU           0x02U
+#define USB_DFU_PROTOCL_RUNTIME 0x01U
+#define USB_DFU_PROTOCL_DFU 0x02U
 
 /* manifestation state */
-#define MANIFEST_COMPLETE             0x00U
-#define MANIFEST_IN_PROGRESS          0x01U
+#define MANIFEST_COMPLETE 0x00U
+#define MANIFEST_IN_PROGRESS 0x01U
 
 /* DFU attributes code */
-#define USB_DFU_CAN_DOWNLOAD          0x01U
-#define USB_DFU_CAN_UPLOAD            0x02U
-#define USB_DFU_MANIFEST_TOLERANT     0x04U
-#define USB_DFU_WILL_DETACH           0x08U
+#define USB_DFU_CAN_DOWNLOAD 0x01U
+#define USB_DFU_CAN_UPLOAD 0x02U
+#define USB_DFU_MANIFEST_TOLERANT 0x04U
+#define USB_DFU_WILL_DETACH 0x08U
 
 /* special commands with download request */
-#define GET_COMMANDS                  0x00U
-#define SET_ADDRESS_POINTER           0x21U
-#define ERASE                         0x41U
+#define GET_COMMANDS 0x00U
+#define SET_ADDRESS_POINTER 0x21U
+#define ERASE 0x41U
 
 /* memory operation command */
-#define CMD_ERASE                     0U
-#define CMD_WRITE                     1U
+#define CMD_ERASE 0U
+#define CMD_WRITE 1U
 
-#define _BYTE1(x)                     (uint8_t)((x) & 0xFFU)                /*!< addressing cycle 1st byte */
-#define _BYTE2(x)                     (uint8_t)(((x) & 0xFF00U) >> 8U)      /*!< addressing cycle 2nd byte */
-#define _BYTE3(x)                     (uint8_t)(((x) & 0xFF0000U) >> 16U)   /*!< addressing cycle 3rd byte */
+#define _BYTE1(x) (uint8_t)((x)&0xFFU)              /*!< addressing cycle 1st byte */
+#define _BYTE2(x) (uint8_t)(((x)&0xFF00U) >> 8U)    /*!< addressing cycle 2nd byte */
+#define _BYTE3(x) (uint8_t)(((x)&0xFF0000U) >> 16U) /*!< addressing cycle 3rd byte */
 
-#define FLASH_ERASE_TIMEOUT           60U
-#define FLASH_WRITE_TIMEOUT           80U
+#define FLASH_ERASE_TIMEOUT 60U
+#define FLASH_WRITE_TIMEOUT 80U
 
 /* bit detach capable = bit 3 in bmAttributes field */
-#define DFU_DETACH_MASK               (uint8_t)(0x10U)
+#define DFU_DETACH_MASK (uint8_t)(0x10U)
 
-#define DFU_DESC_TYPE                 0x21U
+#define DFU_DESC_TYPE 0x21U
 
 /* DFU device state defines */
 typedef enum
@@ -96,7 +96,7 @@ typedef enum
 } dfu_state;
 
 /* DFU device status defines */
-typedef enum 
+typedef enum
 {
     STATUS_OK = 0x00U,
     STATUS_ERR_TARGET,
@@ -117,7 +117,7 @@ typedef enum
 } dfu_status;
 
 /* DFU class-specific requests */
-typedef enum 
+typedef enum
 {
     DFU_DETACH = 0U,
     DFU_DNLOAD,
@@ -134,11 +134,11 @@ typedef enum
 /* USB DFU function descriptor structure */
 typedef struct
 {
-    usb_desc_header header;               /*!< descriptor header, including type and size */
-    uint8_t bmAttributes;                 /*!< DFU attributes */
-    uint16_t wDetachTimeOut;              /*!< time, in milliseconds, that the device will wait after receipt of the DFU_DETACH request. If */ 
-    uint16_t wTransferSize;               /*!< maximum number of bytes that the device can accept per control-write transaction */
-    uint16_t bcdDFUVersion;               /*!< numeric expression identifying the version of the DFU specification release. */
+    usb_desc_header header;  /*!< descriptor header, including type and size */
+    uint8_t bmAttributes;    /*!< DFU attributes */
+    uint16_t wDetachTimeOut; /*!< time, in milliseconds, that the device will wait after receipt of the DFU_DETACH request. If */
+    uint16_t wTransferSize;  /*!< maximum number of bytes that the device can accept per control-write transaction */
+    uint16_t bcdDFUVersion;  /*!< numeric expression identifying the version of the DFU specification release. */
 } usb_desc_dfu_func;
 
 #pragma pack()
@@ -146,11 +146,11 @@ typedef struct
 /* USB configuration descriptor structure */
 typedef struct
 {
-    usb_desc_config           config;
-    usb_desc_itf              dfu_itf0;
-    usb_desc_itf              dfu_itf1;
-    usb_desc_itf              dfu_itf2;
-    usb_desc_dfu_func         dfu_func;
+    usb_desc_config config;
+    usb_desc_itf dfu_itf0;
+    usb_desc_itf dfu_itf1;
+    usb_desc_itf dfu_itf2;
+    usb_desc_dfu_func dfu_func;
 } usb_dfu_desc_config_set;
 
 /* USB DFU handler structure */
@@ -171,7 +171,7 @@ typedef struct
     uint8_t buf[TRANSFER_SIZE];
 } usbd_dfu_handler;
 
-typedef void (*app_func) (void);
+typedef void (*app_func)(void);
 
 extern usb_desc dfu_desc;
 extern usb_class_core dfu_class;

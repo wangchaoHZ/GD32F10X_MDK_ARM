@@ -22,5 +22,5 @@ int main(void)
     systick_config();
     ulog_init();
     ulog_info("this is a demo project.");
-		ulog_info("hello world.");
+    ulog_info("hello world.");
 }

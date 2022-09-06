@@ -40,7 +40,7 @@ OF SUCH DAMAGE.
 
 typedef struct _dfu_mem_prop
 {
-    const uint8_t* pstr_desc;
+    const uint8_t *pstr_desc;
 
     uint8_t (*mem_init)(void);
     uint8_t (*mem_deinit)(void);
@@ -59,13 +59,14 @@ typedef enum
     MEM_FAIL
 } mem_status;
 
-#define _1ST_BYTE(x)              (uint8_t)((x) & 0xFF)               /*!< addressing cycle 1st byte */
-#define _2ND_BYTE(x)              (uint8_t)(((x) & 0xFF00) >> 8)      /*!< addressing cycle 2nd byte */
-#define _3RD_BYTE(x)              (uint8_t)(((x) & 0xFF0000) >> 16)   /*!< addressing cycle 3rd byte */
+#define _1ST_BYTE(x) (uint8_t)((x)&0xFF)             /*!< addressing cycle 1st byte */
+#define _2ND_BYTE(x) (uint8_t)(((x)&0xFF00) >> 8)    /*!< addressing cycle 2nd byte */
+#define _3RD_BYTE(x) (uint8_t)(((x)&0xFF0000) >> 16) /*!< addressing cycle 3rd byte */
 
-#define POLLING_TIMEOUT_SET(x)    buffer[0] = _1ST_BYTE(x);\
-                                  buffer[1] = _2ND_BYTE(x);\
-                                  buffer[2] = _3RD_BYTE(x);
+#define POLLING_TIMEOUT_SET(x) \
+    buffer[0] = _1ST_BYTE(x);  \
+    buffer[1] = _2ND_BYTE(x);  \
+    buffer[2] = _3RD_BYTE(x);
 
 /* function declarations */
 /* initialize the memory media on the GD32 */
@@ -77,7 +78,7 @@ uint8_t dfu_mem_erase(uint32_t addr);
 /* write data to sectors of memory */
 uint8_t dfu_mem_write(uint8_t *buf, uint32_t addr, uint32_t len);
 /* read data from sectors of memory */
-uint8_t* dfu_mem_read(uint8_t *buf, uint32_t addr, uint32_t len);
+uint8_t *dfu_mem_read(uint8_t *buf, uint32_t addr, uint32_t len);
 /* get the status of a given memory and store in buffer */
 uint8_t dfu_mem_getstatus(uint32_t addr, uint8_t cmd, uint8_t *buffer);
 

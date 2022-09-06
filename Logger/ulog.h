@@ -40,19 +40,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ULOG_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef enum
-{
-    ULOG_TRACE_LEVEL=100,
-    ULOG_DEBUG_LEVEL,
-    ULOG_INFO_LEVEL,
-    ULOG_WARNING_LEVEL,
-    ULOG_ERROR_LEVEL,
-    ULOG_CRITICAL_LEVEL,
-    ULOG_ALWAYS_LEVEL
-} ulog_level_t;
+    typedef enum
+    {
+        ULOG_TRACE_LEVEL = 100,
+        ULOG_DEBUG_LEVEL,
+        ULOG_INFO_LEVEL,
+        ULOG_WARNING_LEVEL,
+        ULOG_ERROR_LEVEL,
+        ULOG_CRITICAL_LEVEL,
+        ULOG_ALWAYS_LEVEL
+    } ulog_level_t;
 
 // The following macros enable or disable uLog.  If `ULOG_ENABLED` is
 // defined at compile time, a macro such as `ulog_info(...)` expands
@@ -76,26 +77,62 @@ typedef enum
 #define ulog_always(...) ulog_message(ULOG_ALWAYS_LEVEL, __VA_ARGS__)
 #else
 // uLog vanishes when disabled at compile time...
-#define ulog_init() do {} while(0)
-#define ulog_subscribe(a, b) do {} while(0)
-#define ulog_unsubscribe(a) do {} while(0)
-#define ulog_level_name(a) do {} while(0)
-#define ulog(s, f, ...) do {} while(0)
-#define ulog_trace(f, ...) do {} while(0)
-#define ulog_debug(f, ...) do {} while(0)
-#define ulog_info(f, ...) do {} while(0)
-#define ulog_warning(f, ...) do {} while(0)
-#define ulog_error(f, ...) do {} while(0)
-#define ulog_critical(f, ...) do {} while(0)
-#define ulog_always(f, ...) do {} while(0)
+#define ulog_init() \
+    do              \
+    {               \
+    } while (0)
+#define ulog_subscribe(a, b) \
+    do                       \
+    {                        \
+    } while (0)
+#define ulog_unsubscribe(a) \
+    do                      \
+    {                       \
+    } while (0)
+#define ulog_level_name(a) \
+    do                     \
+    {                      \
+    } while (0)
+#define ulog(s, f, ...) \
+    do                  \
+    {                   \
+    } while (0)
+#define ulog_trace(f, ...) \
+    do                     \
+    {                      \
+    } while (0)
+#define ulog_debug(f, ...) \
+    do                     \
+    {                      \
+    } while (0)
+#define ulog_info(f, ...) \
+    do                    \
+    {                     \
+    } while (0)
+#define ulog_warning(f, ...) \
+    do                       \
+    {                        \
+    } while (0)
+#define ulog_error(f, ...) \
+    do                     \
+    {                      \
+    } while (0)
+#define ulog_critical(f, ...) \
+    do                        \
+    {                         \
+    } while (0)
+#define ulog_always(f, ...) \
+    do                      \
+    {                       \
+    } while (0)
 #endif
 
-typedef enum
-{
-    ULOG_ERR_NONE = 0,
-    ULOG_ERR_SUBSCRIBERS_EXCEEDED,
-    ULOG_ERR_NOT_SUBSCRIBED,
-} ulog_err_t;
+    typedef enum
+    {
+        ULOG_ERR_NONE = 0,
+        ULOG_ERR_SUBSCRIBERS_EXCEEDED,
+        ULOG_ERR_NOT_SUBSCRIBED,
+    } ulog_err_t;
 
 // define the maximum number of concurrent subscribers
 #ifndef ULOG_MAX_SUBSCRIBERS
@@ -105,16 +142,16 @@ typedef enum
 #ifndef ULOG_MAX_MESSAGE_LENGTH
 #define ULOG_MAX_MESSAGE_LENGTH 120
 #endif
-/**
- * @brief: prototype for uLog subscribers.
- */
-typedef void (*ulog_function_t)(ulog_level_t severity, char *msg);
+    /**
+     * @brief: prototype for uLog subscribers.
+     */
+    typedef void (*ulog_function_t)(ulog_level_t severity, char *msg);
 
-void ulog_init(void);
-ulog_err_t ulog_subscribe(ulog_function_t fn, ulog_level_t threshold);
-ulog_err_t ulog_unsubscribe(ulog_function_t fn);
-const char *ulog_level_name(ulog_level_t level);
-void ulog_message(ulog_level_t severity, const char *fmt, ...);
+    void ulog_init(void);
+    ulog_err_t ulog_subscribe(ulog_function_t fn, ulog_level_t threshold);
+    ulog_err_t ulog_unsubscribe(ulog_function_t fn);
+    const char *ulog_level_name(ulog_level_t level);
+    void ulog_message(ulog_level_t severity, const char *fmt, ...);
 
 #ifdef __cplusplus
 }

@@ -31,12 +31,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "ulog.h"
 
-#ifdef ULOG_ENABLED  // whole file...
+#ifdef ULOG_ENABLED // whole file...
 
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-
 
 // =============================================================================
 // types and definitions
@@ -56,11 +55,10 @@ static char s_message[ULOG_MAX_MESSAGE_LENGTH];
 // =============================================================================
 // user-visible code
 
-
 void console_logger(ulog_level_t severity, const char *msg)
 {
     printf("%s [%s]: %s\n",
-           "00-00-00 00.00.00",    // user defined get time function
+           "00-00-00 00.00.00", // user defined get time function
            ulog_level_name(severity),
            msg);
 }
@@ -76,14 +74,13 @@ ulog_err_t ulog_subscribe(ulog_function_t fn, ulog_level_t threshold)
 {
     int available_slot = -1;
     int i;
-    for (i=0; i<ULOG_MAX_SUBSCRIBERS; i++)
+    for (i = 0; i < ULOG_MAX_SUBSCRIBERS; i++)
     {
         if (s_subscribers[i].fn == fn)
         {
             // already subscribed: update threshold and return immediately.
             s_subscribers[i].threshold = threshold;
             return ULOG_ERR_NONE;
-
         }
         else if (s_subscribers[i].fn == NULL)
         {
@@ -105,11 +102,11 @@ ulog_err_t ulog_subscribe(ulog_function_t fn, ulog_level_t threshold)
 ulog_err_t ulog_unsubscribe(ulog_function_t fn)
 {
     int i;
-    for (i=0; i<ULOG_MAX_SUBSCRIBERS; i++)
+    for (i = 0; i < ULOG_MAX_SUBSCRIBERS; i++)
     {
         if (s_subscribers[i].fn == fn)
         {
-            s_subscribers[i].fn = NULL;    // mark as empty
+            s_subscribers[i].fn = NULL; // mark as empty
             return ULOG_ERR_NONE;
         }
     }
@@ -118,7 +115,7 @@ ulog_err_t ulog_unsubscribe(ulog_function_t fn)
 
 const char *ulog_level_name(ulog_level_t severity)
 {
-    switch(severity)
+    switch (severity)
     {
     case ULOG_TRACE_LEVEL:
         return "TRACE";
@@ -147,7 +144,7 @@ void ulog_message(ulog_level_t severity, const char *fmt, ...)
     vsnprintf(s_message, ULOG_MAX_MESSAGE_LENGTH, fmt, ap);
     va_end(ap);
 
-    for (i=0; i<ULOG_MAX_SUBSCRIBERS; i++)
+    for (i = 0; i < ULOG_MAX_SUBSCRIBERS; i++)
     {
         if (s_subscribers[i].fn != NULL)
         {
@@ -162,4 +159,4 @@ void ulog_message(ulog_level_t severity, const char *fmt, ...)
 // =============================================================================
 // private code
 
-#endif  // #ifdef ULOG_ENABLED
+#endif // #ifdef ULOG_ENABLED

@@ -9,27 +9,27 @@
 /*
     Copyright (c) 2022, GigaDevice Semiconductor Inc.
 
-    Redistribution and use in source and binary forms, with or without modification, 
+    Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    1. Redistributions of source code must retain the above copyright notice, this 
+    1. Redistributions of source code must retain the above copyright notice, this
        list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice, 
-       this list of conditions and the following disclaimer in the documentation 
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
        and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holder nor the names of its contributors 
-       may be used to endorse or promote products derived from this software without 
+    3. Neither the name of the copyright holder nor the names of its contributors
+       may be used to endorse or promote products derived from this software without
        specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 */
 
@@ -39,17 +39,17 @@ OF SUCH DAMAGE.
 #include "usbd_enum.h"
 #include "usb_hid.h"
 
-#define USB_DESC_LEN_IAP_REPORT             35U
-#define USB_DESC_LEN_IAP_CONFIG_SET         41U
+#define USB_DESC_LEN_IAP_REPORT 35U
+#define USB_DESC_LEN_IAP_CONFIG_SET 41U
 
 /* special commands with download request */
-#define IAP_OPTION_BYTE                     0x01U
-#define IAP_ERASE                           0x02U
-#define IAP_DNLOAD                          0x03U
-#define IAP_LEAVE                           0x04U
-#define IAP_GETBIN_ADDRESS                  0x05U
+#define IAP_OPTION_BYTE 0x01U
+#define IAP_ERASE 0x02U
+#define IAP_DNLOAD 0x03U
+#define IAP_LEAVE 0x04U
+#define IAP_GETBIN_ADDRESS 0x05U
 
-typedef void (*app_func) (void);
+typedef void (*app_func)(void);
 
 typedef struct
 {
@@ -68,7 +68,7 @@ typedef struct
 
     uint16_t transfer_times;
     uint16_t page_count;
-    uint16_t lps;           /* last packet size */
+    uint16_t lps; /* last packet size */
     uint32_t file_length;
     uint32_t base_address;
 } usbd_iap_handler;
@@ -80,4 +80,4 @@ extern usb_class iap_class;
 /* send IAP report */
 uint8_t iap_report_send(usb_dev *udev, uint8_t *report, uint16_t len);
 
-#endif  /* __USB_IAP_CORE_H */
+#endif /* __USB_IAP_CORE_H */
