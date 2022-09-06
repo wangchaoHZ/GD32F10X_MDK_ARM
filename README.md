@@ -1,2 +1,0 @@
-# GD32F10X_MDK_ARM
-GD32F10X MDK-ARM Demo Project Base on UV5
